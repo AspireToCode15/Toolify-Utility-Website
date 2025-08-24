@@ -1,17 +1,14 @@
 from flask import (
-    Flask, render_template, request, url_for, send_from_directory, redirect, flash, Response, send_file
+    Flask, render_template, request, url_for, send_from_directory, redirect, flash, Response
 )
 import os
-import win32com.client # Isko add karein
-import pythoncom # Aur isko bhi
 from pdf2docx import Converter
 from docx2pdf import convert
-import docx  # From python-docx
-from reportlab.pdfgen import canvas # From reportlab
+import docx
+from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
-import pint # The unit conversion library
-
+import pint
 import subprocess
 import uuid
 import shutil
@@ -24,7 +21,7 @@ from pypdf import PdfWriter, PdfReader
 from PIL import Image
 from tools_backend.mp4_to_mp3 import convert_mp4_to_mp3
 import qrcode
-import fitz  # PyMuPDF
+import fitz
 from docx import Document
 import pypandoc
 from sumy.parsers.plaintext import PlaintextParser
@@ -51,6 +48,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['toolify']
 feedback_collection = db['feedback']
 
+# --- Define Folders Once ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'downloads')
@@ -59,8 +57,8 @@ AUDIO_FOLDER = os.path.join(BASE_DIR, 'static', 'tts_audio')
 for folder in [UPLOAD_FOLDER, DOWNLOAD_FOLDER, CONVERTED_FOLDER, AUDIO_FOLDER]:
     os.makedirs(folder, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
 
-# ======== ROUTES ========
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -78,29 +76,15 @@ def feedback():
         return redirect('/feedback')
     return render_template('feedback.html')
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
 
-@app.route('/features')
-def features():
-    return render_template('features.html')
 
-@app.route('/how-it-works')
-def how_it_works():
-    return render_template('how_it_works.html')
+
+
 
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
 
-@app.route('/terms')
-def terms():
-    return render_template('terms.html')
-
-@app.route('/privacy')
-def privacy():
-    return render_template('privacy.html')
 
 @app.route('/view-feedback')
 def view_feedback():
@@ -111,7 +95,6 @@ def view_feedback():
     feedbacks = feedback_collection.find().sort("_id", -1)
     return render_template('view_feedback.html', feedbacks=feedbacks)
 
-# ========= YOUTUBE DOWNLOADER =========
 @app.route("/youtube_downloader", methods=["GET", "POST"])
 def youtube_downloader():
     if request.method == "POST":
@@ -122,20 +105,20 @@ def youtube_downloader():
             ffmpeg_path = r"C:\\path\\to\\ffmpeg\\bin"
             aria2c_path = r"C:\\path\\to\\aria2"
             os.environ["PATH"] += os.pathsep + ffmpeg_path + os.pathsep + aria2c_path
-
+            
             aria2c_available = shutil.which("aria2c") is not None
             unique_id = str(uuid.uuid4())
             output_path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.%(ext)s")
-
+            
             command = ["yt-dlp", "--force-ipv4", "-f", "bv*+ba/b", "-o", output_path]
             if aria2c_available:
                 command += ["--external-downloader", "aria2c", "--external-downloader-args", "-x 16 -k 1M"]
             command.append(video_url)
-
+            
             result = subprocess.run(command, capture_output=True, text=True, timeout=180)
             if result.returncode != 0:
                 return render_template("youtube_downloader.html", message=f"❌ yt-dlp error:\n\n{result.stderr}")
-
+            
             for ext in ['mp4', 'mkv', 'webm']:
                 path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.{ext}")
                 if os.path.exists(path):
@@ -149,7 +132,6 @@ def youtube_downloader():
             return render_template("youtube_downloader.html", message=f"❌ Error:\n\n{str(e)}")
     return render_template("youtube_downloader.html")
 
-# ========= MP4 TO MP3 =========
 @app.route("/mp4_to_mp3", methods=["GET", "POST"])
 def mp4_to_mp3():
     if request.method == "POST":
@@ -163,7 +145,6 @@ def mp4_to_mp3():
         return render_template("mp4_to_mp3.html", filename=filename, file_url=file_url)
     return render_template("mp4_to_mp3.html")
 
-# ========= FILE COMPRESSOR =========
 @app.route("/file_compressor", methods=["GET", "POST"])
 def file_compressor():
     if request.method == "POST":
@@ -179,10 +160,9 @@ def file_compressor():
             zipf.write(file_path, arcname=file.filename)
         os.remove(file_path)
         return render_template("file_compressor.html", filename=zip_filename,
-                               file_url=url_for("static", filename=f"downloads/{zip_filename}"))
+                                file_url=url_for("static", filename=f"downloads/{zip_filename}"))
     return render_template("file_compressor.html")
 
-# ========= PDF MERGER =========
 @app.route("/pdf_merger", methods=["GET", "POST"])
 def pdf_merger():
     if request.method == "POST":
@@ -200,12 +180,11 @@ def pdf_merger():
             with open(merged_path, "wb") as f_out:
                 writer.write(f_out)
             return render_template("pdf_merger.html", filename=merged_filename,
-                                   file_url=url_for("static", filename=f"downloads/{merged_filename}"))
+                                    file_url=url_for("static", filename=f"downloads/{merged_filename}"))
         except Exception as e:
             return render_template("pdf_merger.html", error=f"❌ Merge failed: {str(e)}")
     return render_template("pdf_merger.html")
 
-# ========= PASSWORD GENERATOR =========
 @app.route("/password_generator", methods=["GET", "POST"])
 def password_generator():
     if request.method == "POST":
@@ -231,20 +210,17 @@ def password_generator():
         return render_template("password_generator.html", password=password)
     return render_template("password_generator.html")
 
-# ========= QR GENERATOR =========
 @app.route('/qr_generator', methods=['GET', 'POST'])
 def qr_generator():
     qr_image = None
     error = None
     data = None
-
     if request.method == 'POST':
         data = request.form.get('data')
         if not data or not data.strip():
             error = "Please enter some data to generate a QR code."
         else:
             try:
-                # --- QR Code Generation Logic ---
                 qr = qrcode.QRCode(
                     version=1,
                     error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -253,21 +229,13 @@ def qr_generator():
                 )
                 qr.add_data(data)
                 qr.make(fit=True)
-
-                # Create an image from the QR Code instance
                 img = qr.make_image(fill_color="black", back_color="white")
-                
-                # Save the image to a memory buffer
                 buffered = BytesIO()
                 img.save(buffered, format="PNG")
-                
-                # Encode the image in base64 to embed it in the HTML
                 qr_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
             except Exception as e:
                 print(f"Error generating QR code: {e}")
                 error = "An error occurred while generating the QR code."
-                
     return render_template(
         'qr_generator.html', 
         qr_image=qr_image, 
@@ -275,7 +243,6 @@ def qr_generator():
         data=data
     )
 
-# ========= IMAGE CONVERTER =========
 @app.route("/image_converter", methods=["GET", "POST"])
 def image_converter():
     if request.method == "POST":
@@ -294,7 +261,6 @@ def image_converter():
             return render_template("image_converter.html", error=f"❌ Conversion failed: {str(e)}")
     return render_template("image_converter.html")
 
-# ========= TEXT SUMMARIZER =========
 @app.route("/text_summarizer", methods=["GET", "POST"])
 def text_summarizer():
     summary = None
@@ -306,20 +272,15 @@ def text_summarizer():
         summary = " ".join(str(sentence) for sentence in summary_sentences)
     return render_template("text_summarizer.html", summary=summary)
 
-# ========= UNIT CONVERTER =========
 ureg = pint.UnitRegistry()
-
-# --- Define the units you want to offer ---
 UNIT_OPTIONS = {
     "Length": ["meter", "kilometer", "centimeter", "millimeter", "mile", "yard", "foot", "inch"],
     "Mass": ["kilogram", "gram", "milligram", "pound", "ounce"],
     "Volume": ["liter", "milliliter", "gallon", "quart", "pint", "cup", "fluid_ounce"]
 }
 
-# --- The Corrected Unit Converter Route ---
 @app.route('/unit_converter', methods=['GET', 'POST'])
 def unit_converter():
-    # --- Default values for the form on first load ---
     context = {
         "unit_options": UNIT_OPTIONS,
         "result": None,
@@ -328,46 +289,21 @@ def unit_converter():
         "from_unit": "meter",
         "to_unit": "kilometer"
     }
-
     if request.method == 'POST':
         try:
-            # Update context with form data
             context['value'] = float(request.form.get('value'))
             context['from_unit'] = request.form.get('from_unit')
             context['to_unit'] = request.form.get('to_unit')
-
-            # Use pint to create a quantity with the input value and unit
             from_quantity = context['value'] * ureg(context['from_unit'])
-            
-            # Convert the quantity to the target unit
             to_quantity = from_quantity.to(ureg(context['to_unit']))
-            
-            # Get the numerical result, rounded for nice display
             context['result'] = round(to_quantity.magnitude, 6)
-
         except pint.errors.DimensionalityError:
             context['error'] = f"Cannot convert from '{context['from_unit']}' to '{context['to_unit']}'. Units are not compatible."
         except Exception as e:
             print(f"Error during unit conversion: {e}")
             context['error'] = "An unexpected error occurred during conversion."
-
-    # Pass the entire context dictionary to the template
     return render_template('unit_converter.html', **context)
 
-
-# Folder ke naam ek hi baar define karein aur poore app mein istemaal karein
-UPLOAD_FOLDER = 'uploads'
-CONVERTED_FOLDER = 'converted' # Sabhi converted files yahan save hongi
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
-
-# App shuru hone par yeh folders ban jayenge
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['CONVERTED_FOLDER'], exist_ok=True)
-
-
-# --- 2. WORD TO PDF Route (Improved for Robustness) ---
 @app.route('/word_to_pdf', methods=['GET', 'POST'])
 def word_to_pdf():
     if request.method == 'POST':
@@ -380,71 +316,50 @@ def word_to_pdf():
 
         if file and file.filename.lower().endswith(('.docx')):
             try:
-                # 1. Securely save the uploaded .docx file
                 original_filename = secure_filename(file.filename)
                 input_path = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
                 file.save(input_path)
-
-                # 2. Read the content from the .docx file
                 doc = docx.Document(input_path)
-                
-                # 3. Create a new PDF file
                 pdf_filename = f"{os.path.splitext(original_filename)[0]}.pdf"
                 pdf_path = os.path.join(app.config['CONVERTED_FOLDER'], pdf_filename)
                 
                 c = canvas.Canvas(pdf_path, pagesize=letter)
                 width, height = letter
                 
-                # Set starting position for text
                 text = c.beginText(1 * inch, height - 1 * inch)
                 text.setFont("Helvetica", 12)
-
-                # 4. Write each paragraph from Word to the PDF
                 for para in doc.paragraphs:
-                    # Simple text extraction, doesn't handle complex formatting like tables/images
                     text.textLine(para.text)
-
                 c.drawText(text)
                 c.showPage()
                 c.save()
-
-                # 5. Clean up the original uploaded file
                 os.remove(input_path)
-
                 return render_template('word_to_pdf.html', pdf_file=pdf_filename)
-
             except Exception as e:
                 print(f"An error occurred: {e}")
                 return render_template('word_to_pdf.html', message="Conversion failed. The file might be corrupt or in an unsupported format.")
         else:
             return render_template('word_to_pdf.html', message="Invalid file type. Please upload a .docx file.")
-
     return render_template('word_to_pdf.html')
 
-
-
-
-# --- 3. PDF TO WORD Route (FIXED to work with existing structure) ---
 @app.route('/pdf_to_word', methods=['GET', 'POST'])
 def pdf_to_word():
     if request.method == 'POST':
         pdf_file = request.files.get('pdf_file')
         if not pdf_file or not pdf_file.filename.lower().endswith('.pdf'):
             return render_template('pdf_to_word.html', message="Please select a valid PDF file.")
-
+        
         filename = secure_filename(pdf_file.filename)
         input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         pdf_file.save(input_path)
-
+        
         output_filename = filename.rsplit('.', 1)[0] + '.docx'
-        # File ko usi CONVERTED_FOLDER mein save karein
         output_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
         
         try:
             cv = Converter(input_path)
             cv.convert(output_path, start=0, end=None)
             cv.close()
-            # Converted file ka naam template ko bhejein
             return render_template('pdf_to_word.html', word_file=output_filename)
         except Exception as e:
             error_message = f"Conversion Failed: {str(e)}"
@@ -452,17 +367,9 @@ def pdf_to_word():
             
     return render_template('pdf_to_word.html')
 
-
-# --- 4. Download Route (FIXED to work for BOTH conversions) ---
-# Ismein koi badlaav nahi, bas yeh ab dono ke liye kaam karega
 @app.route('/download/<filename>')
 def download_file(filename):
-    """
-    Yeh function CONVERTED_FOLDER se file download karega,
-    chahe woh PDF ho ya DOCX.
-    """
     try:
-        # Flask ka behtar tareeka file bhejne ka
         return send_from_directory(
             app.config['CONVERTED_FOLDER'], 
             filename,
@@ -470,10 +377,3 @@ def download_file(filename):
         )
     except FileNotFoundError:
         return "File not found!", 404
-
-
-# --- Application ko chalane ke liye ---
-
-
-# ======== END ROUTES ========
-
