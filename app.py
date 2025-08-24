@@ -32,7 +32,6 @@ import requests
 from pymongo import MongoClient
 import nltk
 
-# --- NLTK setup ---
 nltk_data_path = os.path.join(os.path.dirname(__file__), "nltk_data")
 os.makedirs(nltk_data_path, exist_ok=True)
 nltk.data.path.append(nltk_data_path)
@@ -48,7 +47,6 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['toolify']
 feedback_collection = db['feedback']
 
-# --- Define Folders Once ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'downloads')
@@ -76,15 +74,9 @@ def feedback():
         return redirect('/feedback')
     return render_template('feedback.html')
 
-
-
-
-
-
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
-
 
 @app.route('/view-feedback')
 def view_feedback():
@@ -105,20 +97,20 @@ def youtube_downloader():
             ffmpeg_path = r"C:\\path\\to\\ffmpeg\\bin"
             aria2c_path = r"C:\\path\\to\\aria2"
             os.environ["PATH"] += os.pathsep + ffmpeg_path + os.pathsep + aria2c_path
-            
+
             aria2c_available = shutil.which("aria2c") is not None
             unique_id = str(uuid.uuid4())
             output_path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.%(ext)s")
-            
+
             command = ["yt-dlp", "--force-ipv4", "-f", "bv*+ba/b", "-o", output_path]
             if aria2c_available:
                 command += ["--external-downloader", "aria2c", "--external-downloader-args", "-x 16 -k 1M"]
             command.append(video_url)
-            
+
             result = subprocess.run(command, capture_output=True, text=True, timeout=180)
             if result.returncode != 0:
                 return render_template("youtube_downloader.html", message=f"❌ yt-dlp error:\n\n{result.stderr}")
-            
+
             for ext in ['mp4', 'mkv', 'webm']:
                 path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.{ext}")
                 if os.path.exists(path):
@@ -234,14 +226,8 @@ def qr_generator():
                 img.save(buffered, format="PNG")
                 qr_image = base64.b64encode(buffered.getvalue()).decode('utf-8')
             except Exception as e:
-                print(f"Error generating QR code: {e}")
                 error = "An error occurred while generating the QR code."
-    return render_template(
-        'qr_generator.html', 
-        qr_image=qr_image, 
-        error=error,
-        data=data
-    )
+    return render_template('qr_generator.html', qr_image=qr_image, error=error, data=data)
 
 @app.route("/image_converter", methods=["GET", "POST"])
 def image_converter():
@@ -300,7 +286,6 @@ def unit_converter():
         except pint.errors.DimensionalityError:
             context['error'] = f"Cannot convert from '{context['from_unit']}' to '{context['to_unit']}'. Units are not compatible."
         except Exception as e:
-            print(f"Error during unit conversion: {e}")
             context['error'] = "An unexpected error occurred during conversion."
     return render_template('unit_converter.html', **context)
 
@@ -309,11 +294,9 @@ def word_to_pdf():
     if request.method == 'POST':
         if 'word_file' not in request.files:
             return render_template('word_to_pdf.html', message="Form Error: No file part sent.")
-        
         file = request.files['word_file']
         if file.filename == '':
             return render_template('word_to_pdf.html', message="No file selected.")
-
         if file and file.filename.lower().endswith(('.docx')):
             try:
                 original_filename = secure_filename(file.filename)
@@ -322,13 +305,18 @@ def word_to_pdf():
                 doc = docx.Document(input_path)
                 pdf_filename = f"{os.path.splitext(original_filename)[0]}.pdf"
                 pdf_path = os.path.join(app.config['CONVERTED_FOLDER'], pdf_filename)
-                
                 c = canvas.Canvas(pdf_path, pagesize=letter)
                 width, height = letter
-                
                 text = c.beginText(1 * inch, height - 1 * inch)
                 text.setFont("Helvetica", 12)
+                max_height = 1 * inch
+                line_height = 14
                 for para in doc.paragraphs:
+                    if text.getY() <= max_height:
+                        c.drawText(text)
+                        c.showPage()
+                        text = c.beginText(1 * inch, height - 1 * inch)
+                        text.setFont("Helvetica", 12)
                     text.textLine(para.text)
                 c.drawText(text)
                 c.showPage()
@@ -336,7 +324,6 @@ def word_to_pdf():
                 os.remove(input_path)
                 return render_template('word_to_pdf.html', pdf_file=pdf_filename)
             except Exception as e:
-                print(f"An error occurred: {e}")
                 return render_template('word_to_pdf.html', message="Conversion failed. The file might be corrupt or in an unsupported format.")
         else:
             return render_template('word_to_pdf.html', message="Invalid file type. Please upload a .docx file.")
@@ -348,14 +335,11 @@ def pdf_to_word():
         pdf_file = request.files.get('pdf_file')
         if not pdf_file or not pdf_file.filename.lower().endswith('.pdf'):
             return render_template('pdf_to_word.html', message="Please select a valid PDF file.")
-        
         filename = secure_filename(pdf_file.filename)
         input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         pdf_file.save(input_path)
-        
         output_filename = filename.rsplit('.', 1)[0] + '.docx'
         output_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-        
         try:
             cv = Converter(input_path)
             cv.convert(output_path, start=0, end=None)
@@ -364,7 +348,6 @@ def pdf_to_word():
         except Exception as e:
             error_message = f"Conversion Failed: {str(e)}"
             return render_template('pdf_to_word.html', message=error_message)
-            
     return render_template('pdf_to_word.html')
 
 @app.route('/download/<filename>')
