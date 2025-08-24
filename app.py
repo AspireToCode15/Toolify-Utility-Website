@@ -3,11 +3,12 @@ from flask import (
 )
 import os
 from pdf2docx import Converter
-from docx2pdf import convert
 import docx
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 import pint
 import subprocess
 import uuid
@@ -18,7 +19,7 @@ import string
 import base64
 from io import BytesIO
 from pypdf import PdfWriter, PdfReader
-from PIL import Image
+from PIL import Image as PILImage
 from tools_backend.mp4_to_mp3 import convert_mp4_to_mp3
 import qrcode
 import fitz
@@ -87,42 +88,27 @@ def view_feedback():
     feedbacks = feedback_collection.find().sort("_id", -1)
     return render_template('view_feedback.html', feedbacks=feedbacks)
 
-@app.route("/youtube_downloader", methods=["GET", "POST"])
-def youtube_downloader():
+# ========= NEW WORD DICTIONARY TOOL =========
+@app.route("/dictionary", methods=["GET", "POST"])
+def dictionary():
+    definition = None
+    error = None
+    word = None
     if request.method == "POST":
-        video_url = request.form.get("url")
-        if not video_url or not video_url.startswith(("http://", "https://")):
-            return render_template("youtube_downloader.html", message="❌ Please enter a valid YouTube URL.")
-        try:
-            ffmpeg_path = r"C:\\path\\to\\ffmpeg\\bin"
-            aria2c_path = r"C:\\path\\to\\aria2"
-            os.environ["PATH"] += os.pathsep + ffmpeg_path + os.pathsep + aria2c_path
-
-            aria2c_available = shutil.which("aria2c") is not None
-            unique_id = str(uuid.uuid4())
-            output_path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.%(ext)s")
-
-            command = ["yt-dlp", "--force-ipv4", "-f", "bv*+ba/b", "-o", output_path]
-            if aria2c_available:
-                command += ["--external-downloader", "aria2c", "--external-downloader-args", "-x 16 -k 1M"]
-            command.append(video_url)
-
-            result = subprocess.run(command, capture_output=True, text=True, timeout=180)
-            if result.returncode != 0:
-                return render_template("youtube_downloader.html", message=f"❌ yt-dlp error:\n\n{result.stderr}")
-
-            for ext in ['mp4', 'mkv', 'webm']:
-                path = os.path.join(DOWNLOAD_FOLDER, f"{unique_id}.{ext}")
-                if os.path.exists(path):
-                    file_url = url_for('static', filename=f"downloads/{unique_id}.{ext}")
-                    return render_template("youtube_downloader.html", filename=f"{unique_id}.{ext}", file_url=file_url)
-
-            return render_template("youtube_downloader.html", message="❌ Download failed.")
-        except subprocess.TimeoutExpired:
-            return render_template("youtube_downloader.html", message="❌ Timeout.")
-        except Exception as e:
-            return render_template("youtube_downloader.html", message=f"❌ Error:\n\n{str(e)}")
-    return render_template("youtube_downloader.html")
+        word = request.form.get("word")
+        if not word:
+            error = "Please enter a word to search."
+        else:
+            try:
+                api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+                response = requests.get(api_url)
+                if response.status_code == 200:
+                    definition = response.json()[0]
+                else:
+                    error = f"Could not find a definition for '{word}'. Please check the spelling."
+            except Exception as e:
+                error = f"An error occurred: {str(e)}"
+    return render_template("dictionary.html", definition=definition, error=error, word=word)
 
 @app.route("/mp4_to_mp3", methods=["GET", "POST"])
 def mp4_to_mp3():
@@ -237,7 +223,7 @@ def image_converter():
         if not image or not fmt:
             return render_template("image_converter.html", error="❌ Please upload an image and select a format.")
         try:
-            original = Image.open(image)
+            original = PILImage.open(image)
             output_filename = f"{uuid.uuid4()}.{fmt.lower()}"
             output_path = os.path.join(DOWNLOAD_FOLDER, output_filename)
             original.save(output_path, format=fmt.upper())
@@ -305,22 +291,13 @@ def word_to_pdf():
                 doc = docx.Document(input_path)
                 pdf_filename = f"{os.path.splitext(original_filename)[0]}.pdf"
                 pdf_path = os.path.join(app.config['CONVERTED_FOLDER'], pdf_filename)
-                c = canvas.Canvas(pdf_path, pagesize=letter)
-                width, height = letter
-                text = c.beginText(1 * inch, height - 1 * inch)
-                text.setFont("Helvetica", 12)
-                max_height = 1 * inch
-                line_height = 14
+                styles = getSampleStyleSheet()
+                elements = []
                 for para in doc.paragraphs:
-                    if text.getY() <= max_height:
-                        c.drawText(text)
-                        c.showPage()
-                        text = c.beginText(1 * inch, height - 1 * inch)
-                        text.setFont("Helvetica", 12)
-                    text.textLine(para.text)
-                c.drawText(text)
-                c.showPage()
-                c.save()
+                    elements.append(Paragraph(para.text, styles['Normal']))
+                    elements.append(Spacer(1, 12))
+                pdf = SimpleDocTemplate(pdf_path, pagesize=letter)
+                pdf.build(elements)
                 os.remove(input_path)
                 return render_template('word_to_pdf.html', pdf_file=pdf_filename)
             except Exception as e:
