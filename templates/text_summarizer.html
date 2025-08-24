@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Text Summarizer - Toolify{% endblock %}
+
+{% block content %}
+<style>
+  /* --- Consistent theme styles from other pages --- */
+  body {
+    background-color: #0a0a0a;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 255, 195, 0.05) 1px, transparent 1px), linear-gradient(to right, rgba(0, 255, 195, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -2;
+    animation: pan-grid 60s linear infinite;
+  }
+
+  @keyframes pan-grid { from { background-position: 0 0; } to { background-position: 400px 400px; } }
+  @keyframes aurora { 0% { transform: translate(10%, 10%) rotate(0deg); } 50% { transform: translate(-10%, -10%) rotate(180deg); } 100% { transform: translate(10%, 10%) rotate(360deg); } }
+
+  .tool-section {
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+  }
+
+  /* --- Glassy container style --- */
+  .tool-wrapper {
+    max-width: 800px; /* Wider for better text display */
+    width: 100%;
+    padding: 40px;
+    background: rgba(18, 25, 39, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 195, 0.15);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .tool-wrapper:hover {
+    border-color: rgba(0, 255, 195, 0.4);
+    box-shadow: 0 0 25px rgba(0, 255, 195, 0.2);
+  }
+
+  .tool-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(0, 255, 195, 0.1) 0%, transparent 40%);
+    animation: aurora 8s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* --- Form Styling --- */
+  .tool-title {
+    font-size: 2.5rem;
+    text-align: center;
+    color: #00ffc3;
+    text-shadow: 0 0 8px #00ffc3;
+    margin-bottom: 20px;
+  }
+
+  .tool-description {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    color: #aaa;
+  }
+
+  .summarizer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #222;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: rgba(28, 28, 28, 0.7);
+    color: #fff;
+    outline: none;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  textarea:focus {
+    border-color: #00ffc3;
+    box-shadow: 0 0 10px rgba(0, 255, 195, 0.3);
+  }
+
+  .summarize-btn {
+    padding: 14px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    background: #00ffc3;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px #00ffc3, 0 0 20px #00ffc3;
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .summarize-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #00ffc3, 0 0 30px #00ffc3;
+  }
+  
+  .summarize-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .output-box {
+    margin-top: 30px; padding: 20px;
+    border-radius: 10px;
+    background: rgba(0, 255, 195, 0.1);
+    border: 1px solid #00ffc3;
+    color: #fff;
+    text-align: left; /* Better for reading summaries */
+    line-height: 1.6;
+  }
+</style>
+
+<div class="background-grid"></div>
+
+<section class="tool-section">
+  <div class="tool-wrapper">
+    <h2 class="tool-title">📝 Text Summarizer</h2>
+    <p class="tool-description">Paste your long text and get a concise summary instantly. No fluff, just the key points.</p>
+    
+    <form method="POST" class="summarizer-form" id="summarizeForm">
+      <textarea name="text" rows="10" placeholder="Paste your long text here..." required>{{ original_text or '' }}</textarea>
+      <button type="submit" class="summarize-btn" id="summarizeBtn">
+        <span id="btn-text">Summarize ✨</span>
+        <div class="spinner" id="spinner" style="display: none;"></div>
+      </button>
+    </form>
+
+    {% if summary %}
+    <div class="output-box">
+      <h3 class="tool-title" style="font-size: 1.8rem; margin-bottom: 15px;">Summary:</h3>
+      <p>{{ summary }}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+    const summarizeForm = document.getElementById('summarizeForm');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+
+    summarizeForm.addEventListener('submit', (event) => {
+        // Find the textarea inside the form
+        const textArea = summarizeForm.querySelector('textarea');
+        if (textArea.value.trim() === '') {
+            event.preventDefault();
+            alert("Please paste some text to summarize!");
+            return;
+        }
+        summarizeBtn.disabled = true;
+        btnText.textContent = 'Summarizing...';
+        spinner.style.display = 'block';
+    });
+</script>
+{% endblock %}

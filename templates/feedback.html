@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  /* --- Inherited Styles from FAQ page for consistency --- */
+  body {
+    background-color: #0a0a0a;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 255, 195, 0.05) 1px, transparent 1px), linear-gradient(to right, rgba(0, 255, 195, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -2;
+    animation: pan-grid 60s linear infinite;
+  }
+
+  @keyframes pan-grid {
+    from { background-position: 0 0; }
+    to { background-position: 400px 400px; }
+  }
+
+  @keyframes aurora {
+    0% { transform: translate(10%, 10%) rotate(0deg); }
+    50% { transform: translate(-10%, -10%) rotate(180deg); }
+    100% { transform: translate(10%, 10%) rotate(360deg); }
+  }
+
+  /* --- Container style from FAQ applied to Feedback Section --- */
+  .feedback-section {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 40px 30px;
+    background: rgba(18, 25, 39, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 195, 0.15);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .feedback-section:hover {
+    border-color: rgba(0, 255, 195, 0.4);
+    box-shadow: 0 0 25px rgba(0, 255, 195, 0.2);
+  }
+
+  .feedback-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(0, 255, 195, 0.1) 0%, transparent 40%);
+    animation: aurora 8s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* --- Original Form styling (Untouched as requested) --- */
+  .section-heading {
+    text-align: center;
+    font-size: 2.8rem;
+    color: #00bfff;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px #00bfff, 0 0 20px #0077cc;
+  }
+
+  .feedback-subtext {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 30px;
+    font-style: italic;
+    text-shadow: 0 0 5px #333;
+  }
+
+  .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #00d9ff;
+    text-shadow: 0 0 5px #00bfff;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    background: #0e1724;
+    color: #fff;
+    box-shadow: 0 0 8px #00bfff44 inset;
+    outline: none;
+    transition: 0.3s ease;
+  }
+  
+  .form-group select option {
+      background: #0e1724;
+      color: #fff;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    box-shadow: 0 0 10px #00e5ff;
+  }
+
+  .submit-btn {
+    background-color: #00bfff;
+    color: #fff;
+    padding: 14px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00bfff, 0 0 20px #00e5ff;
+    transition: 0.3s ease;
+    width: fit-content;
+    align-self: center;
+  }
+
+  .submit-btn:hover {
+    background-color: #0080ff;
+    box-shadow: 0 0 15px #00e5ff, 0 0 30px #00cfff;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="background-grid"></div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="text-align:center; color:lime; font-weight:bold; padding:10px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<section class="feedback-section">
+  <h1 class="section-heading">💬 We Value Your Feedback</h1>
+  <p class="feedback-subtext">Help us improve Toolify. Your words shape the next-gen tools. 🔧</p>
+
+  <form class="feedback-form" method="POST" action="#">
+    <div class="form-group">
+      <label for="name">👤 Name</label>
+      <input type="text" id="name" name="name" required placeholder="Enter your full name">
+    </div>
+
+    <div class="form-group">
+      <label for="email">📧 Email</label>
+      <input type="email" id="email" name="email" required placeholder="Enter your email">
+    </div>
+
+    <div class="form-group">
+      <label for="rating">⭐ Rating</label>
+      <select id="rating" name="rating" required>
+        <option value="">Choose a rating</option>
+        <option value="5">5 - Outstanding!</option>
+        <option value="4">4 - Pretty good</option>
+        <option value="3">3 - Decent</option>
+        <option value="2">2 - Needs work</option>
+        <option value="1">1 - Bad experience</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="message">📝 Message</label>
+      <textarea id="message" name="message" rows="5" required placeholder="Share your thoughts..."></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">🚀 Submit Feedback</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Toolify ⚙️{% endblock %}</title>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='assets/favicon.ico') }}" type="image/x-icon">
+  
+  <!-- Fonts + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* === GLOBAL RESET === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Orbitron', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1c1c1c, #3e2f2f); /* Black + Brown classy blend */
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === NAVBAR === */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2.5rem;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffcc70;
+      text-shadow: 0 0 12px #ffcc70;
+      letter-spacing: 1px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #ffffffcc;
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 8px 16px;
+      border-radius: 12px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    nav ul li a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffcc70;
+      box-shadow: 0 0 12px #ffcc70;
+    }
+
+    /* === MAIN CONTENT === */
+    .content {
+      flex: 1;
+      padding: 3rem 2.5rem;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    /* === FOOTER === */
+    .footer {
+      background: rgba(0, 0, 0, 0.8);
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer strong {
+      color: #ffe600;
+      font-weight: bold;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* === SCROLLBAR === */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #ffcc70;
+      border-radius: 8px;
+    }
+
+    /* === MEDIA === */
+    @media (max-width: 768px) {
+      nav ul {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        justify-content: center;
+      }
+
+      .content {
+        padding: 2rem 1.5rem;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🛠️ Navbar -->
+  <header class="navbar">
+    <div class="logo">⚙️ Toolify</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+       
+        <li><a href="{{ url_for('faq') }}">FAQs</a></li>
+        <li><a href="{{ url_for('feedback') }}">Feedback</a></li>
+      
+      </ul>
+    </nav>
+  </header>
+
+  <!-- 🎯 Main Page Content -->
+  <main class="content">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- 💫 Footer -->
+  <footer class="footer">
+    <p>🚀 Made with 💡 and 💻 by <strong>Sadiq</strong> • &copy; 2025 Toolify</p>
+  </footer>
+
+  <!-- 🤖 Optional FAQ Toggle Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const items = document.querySelectorAll(".faq-item");
+      items.forEach(item => {
+        const btn = item.querySelector(".faq-question");
+        if (btn) {
+          btn.addEventListener("click", () => {
+            item.classList.toggle("active");
+            items.forEach(other => {
+              if (other !== item) other.classList.remove("active");
+            });
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

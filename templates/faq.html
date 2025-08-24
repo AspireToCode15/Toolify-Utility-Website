@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  /* --- Inherited Styles from your index.html for consistency --- */
+  body {
+    background-color: #0a0a0a; /* Same as index page */
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 255, 195, 0.05) 1px, transparent 1px), linear-gradient(to right, rgba(0, 255, 195, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -2;
+    animation: pan-grid 60s linear infinite;
+  }
+
+  @keyframes pan-grid {
+    from { background-position: 0 0; }
+    to { background-position: 400px 400px; }
+  }
+
+  @keyframes aurora {
+    0% { transform: translate(10%, 10%) rotate(0deg); }
+    50% { transform: translate(-10%, -10%) rotate(180deg); }
+    100% { transform: translate(10%, 10%) rotate(360deg); }
+  }
+
+  /* --- Updated FAQ Section --- */
+  .faq-section {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 40px;
+    /* This is the styling from your .card-base class */
+    background: rgba(18, 25, 39, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 195, 0.15);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .faq-section:hover {
+    border-color: rgba(0, 255, 195, 0.4);
+    box-shadow: 0 0 25px rgba(0, 255, 195, 0.2);
+  }
+
+  .faq-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(0, 255, 195, 0.1) 0%, transparent 40%);
+    animation: aurora 8s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .faq-section h1 {
+    text-align: center;
+    font-size: 36px;
+    color: #00ffc3; /* Changed to match your site's theme color */
+    margin-bottom: 30px;
+    text-shadow: 0 0 8px #00ffc3;
+  }
+
+  .faq-item {
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+  }
+  
+  .faq-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+  }
+
+  .faq-question {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05); /* Modern transparent background */
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+
+  .faq-question:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .faq-answer {
+    margin-top: 10px;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.2); /* Darker transparent background */
+    border-left: 3px solid #00ffc3; /* Theme-colored accent */
+    border-radius: 8px;
+    display: none;
+    color: #ccc;
+    line-height: 1.6;
+  }
+
+  .faq-answer.show {
+    display: block;
+    animation: fadeIn 0.4s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="background-grid"></div>
+
+<section class="faq-section">
+  <h1>❓ Frequently Asked Questions</h1>
+
+  <div class="faq-item">
+    <div class="faq-question">What is Toolify?</div>
+    <div class="faq-answer">Toolify is your all-in-one offline toolbox with tools like YouTube Downloader, File Compressor, PDF tools, QR Generator and more.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Does it work offline?</div>
+    <div class="faq-answer">Yes! Most tools are fully offline and run locally on your machine.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Is Toolify free to use?</div>
+    <div class="faq-answer">100% free and open-source. No ads, no tracking, no BS.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">Can I add more tools later?</div>
+    <div class="faq-answer">Absolutely. Toolify is modular — you can plug in new tools anytime.</div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(q => {
+      q.addEventListener('click', () => {
+        const answer = q.nextElementSibling;
+        const allAnswers = document.querySelectorAll('.faq-answer');
+        
+        // Optional: Close other answers when one is opened
+        allAnswers.forEach(ans => {
+            if (ans !== answer && ans.classList.contains('show')) {
+                ans.classList.remove('show');
+            }
+        });
+
+        answer.classList.toggle('show');
+      });
+    });
+  });
+</script>
+{% endblock %}

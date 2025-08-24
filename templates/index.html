@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Toolify{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+<style>
+    body { background-color: #0a0a0a; color: #fff; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+    .background-grid {position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,255,195,0.05) 1px,transparent 1px),linear-gradient(to right,rgba(0,255,195,0.05) 1px,transparent 1px);background-size:40px 40px;z-index:-2;animation:pan-grid 60s linear infinite;}
+    @keyframes pan-grid {from{background-position:0 0;}to{background-position:400px 400px;}}
+    
+    .container{max-width:1100px;margin:0 auto;padding:80px 20px;}
+    .section-heading{text-align:center;font-size:2.8rem;color:#fff;margin-bottom:15px; position: relative; z-index: 1;}
+    .section-subheading{text-align:center;font-size:1.2rem;color:#888;margin-bottom:50px;max-width:600px;margin-left:auto;margin-right:auto; position: relative; z-index: 1;}
+    
+    .hero{text-align:center;padding:60px 20px;min-height:90vh;display:flex;flex-direction:column;justify-content:center; position:relative; overflow: hidden;}
+    .hero-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;}
+    .hero-content{position:relative;z-index:1;transition: transform 0.1s ease-out;}
+    .hero-title{font-size:3.5rem;font-weight:bold;margin-bottom:10px;color:#fff;display:flex;justify-content:center;align-items:center;gap:20px;}
+    .logo-spin{font-size:3.5rem;display:inline-block;color:#00ffc3;text-shadow:0 0 8px #00ffc3;transform-origin:center center;will-change:transform;animation:spin-stable 4s linear infinite;}
+    @keyframes spin-stable{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+    .glow{color:#00ffc3;text-shadow:0 0 8px #00ffc3,0 0 16px #00ffc3;}
+    .hero-subtitle{font-size:1.2rem;margin-bottom:40px;color:#aaa;min-height:1.5em;}
+    
+    .wave-divider{display: none;} /* Removed wave dividers for a cleaner, unified look */
+
+    /* ===== Base Class for Upgraded Boxes ===== */
+    .card-base {
+        background: rgba(18, 25, 39, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 255, 195, 0.15);
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        margin-bottom: 60px;
+        padding: 60px 20px;
+    }
+    .card-base:hover {
+        border-color: rgba(0, 255, 195, 0.4);
+        box-shadow: 0 0 25px rgba(0, 255, 195, 0.2);
+    }
+    .card-base::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle at center, rgba(0, 255, 195, 0.1) 0%, transparent 40%);
+        animation: aurora 8s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+    }
+    @keyframes aurora { 
+        0% { transform: translate(10%, 10%) rotate(0deg); }
+        50% { transform: translate(-10%, -10%) rotate(180deg); }
+        100% { transform: translate(10%, 10%) rotate(360deg); }
+    }
+    
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px; perspective: 1000px;}
+    .feature-card-3d{padding:40px 30px;text-align:center;transition:transform 0.4s ease; will-change: transform; background: rgba(28, 28, 28, 0.5); border: 1px solid #222; border-radius: 20px;}
+    .feature-card-3d:hover{border-color:#00ffc3;box-shadow: 0 20px 40px rgba(0, 255, 195, 0.2);}
+    .feature-icon{font-size:3rem;color:#00ffc3;margin-bottom:20px;transition:text-shadow 0.3s ease;}
+    .feature-card-3d:hover .feature-icon{text-shadow:0 0 15px #00ffc3;}
+    .feature-card-3d h3{font-size:1.5rem;margin-bottom:15px;color:#fff;}
+    .feature-card-3d p{font-size:1rem;line-height:1.6;color:#aaa;}
+
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .testimonial-card { padding: 30px; background: rgba(22, 27, 34, 0.5); border: 1px solid #222; border-radius: 15px;}
+    .testimonial-quote { font-style: italic; color: #ddd; border-left: 3px solid #00ffc3; padding-left: 20px; margin-bottom: 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 15px; }
+    .testimonial-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #00ffc3; }
+    .author-details h4 { margin: 0; color: #fff; }
+    .author-details p { margin: 0; color: #888; }
+    
+    .timeline{position:relative;max-width:900px;margin:0 auto;}
+    .timeline::after{content:'';position:absolute;width:4px;background:#00ffc3;top:0;bottom:0;left:50%;margin-left:-2px;opacity:0.3;}
+    .timeline-container{padding:10px 40px;position:relative;width:50%;}
+    .timeline-container.left{left:0;}
+    .timeline-container.right{left:50%;}
+    .timeline-container::after{content:' ';position:absolute;width:25px;height:25px;right:-12.5px;background-color:#111;border:4px solid #00ffc3;top:25px;border-radius:50%;z-index:1;transition:box-shadow 0.3s ease;}
+    .timeline-container.right::after{left:-12.5px;}
+    .timeline-container.aos-animate::after{box-shadow: 0 0 15px #00ffc3;}
+    .timeline-content{padding:20px 30px; position:relative; background: rgba(28, 28, 28, 0.5); border-radius: 15px;}
+    .timeline-content h3{font-size:1.3rem;color:#00ffc3;margin-top:0;}
+    
+    .accordion details {margin-bottom: 15px !important; background:rgba(22, 27, 34, 0.5); border:1px solid #222; border-radius: 10px;}
+    .accordion details:hover {border-color: #00ffc3;}
+    .accordion summary{font-size:1.2rem;font-weight:bold;color:#00ffc3;padding:20px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+    .accordion summary::-webkit-details-marker{display:none;}
+    .accordion summary::after{content:'+';font-size:2rem; transition: transform 0.2s;}
+    .accordion details[open] summary::after{transform: rotate(45deg);}
+    .accordion .legal-content{padding:0 20px 20px;color:#aaa;line-height:1.7;}
+    .accordion ul{list-style-type:'✔ ';padding-left:20px;}
+    
+    .explore-tools-wrapper{text-align:center;padding:80px 0;}
+    .cta-button{background:#00ffc3;color:#000;padding:14px 30px;border-radius:50px;font-weight:bold;text-decoration:none;box-shadow:0 0 10px #00ffc3,0 0 20px #00ffc3;transition:transform 0.3s ease;border:none;cursor:pointer;}
+    .cta-button:hover{transform:scale(1.05);}
+    
+    #tools-section{display:none;}
+    .tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px;}
+    .tool-card { position: relative; overflow: hidden; background: transparent; padding: 30px 20px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; border: none; }
+    @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false;}
+    .tool-card::before,.tool-card::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border-radius:20px;z-index:-1;}
+    .tool-card::before{background:conic-gradient(from var(--angle),#00cfff,#ff00aa,#aaff00,#00cfff);animation:spin 4s linear infinite;opacity:0;transition:opacity 0.4s ease-in-out;}
+    .tool-card::after{background:rgba(22,22,22,0.8);}
+    .tool-card:hover::before{opacity:1;}
+    @keyframes spin{to{--angle:360deg;}}
+    .tool-card:hover{transform:scale(1.03);box-shadow:0 0 25px rgba(0,255,200,0.5);}
+    .tool-title{font-size:1.5rem;margin-bottom:15px;font-weight:bold;text-shadow:0 0 4px currentColor;}
+    .tool-btn{display:inline-block;padding:10px 20px;border-radius:30px;text-decoration:none;font-weight:bold;background-color:#00ffc3;color:#000;transition:all 0.3s ease;box-shadow:0 0 8px #00ffc3,0 0 15px #00ffc3;}
+    .tool-btn:hover{transform:scale(1.05);}
+    .neon-blue{color:#00cfff;}.neon-yellow{color:#fffb00;}.neon-green{color:#00ff88;}.neon-orange{color:#ff9100;}.neon-pink{color:#ff00aa;}.neon-red{color:#ff3d3d;}.neon-purple{color:#b56bff;}.neon-cyan{color:#00f6ff;}.neon-lime{color:#aaff00;}.neon-white{color:#fff;}.neon-teal{color:#00ffe7;}.neon-gold{color:#ffd700;}
+    .flicker{animation:flicker 2s infinite alternate;}
+    @keyframes flicker{0%{opacity:1;}50%{opacity:0.7;}100%{opacity:1;}}
+</style>
+
+<div class="background-grid"></div>
+
+<section class="hero">
+    <canvas id="hero-canvas" class="hero-canvas"></canvas>
+    <div class="hero-content">
+        <h1 class="hero-title" data-aos="zoom-in"><span class="logo-spin">⚙️</span> Welcome to <span class="glow">Toolify</span></h1>
+        <p class="hero-subtitle" id="typewriter" data-aos="fade-up" data-aos-delay="200"></p> 
+    </div>
+</section>
+
+<section class="features-teaser card-base">
+    <div class="container">
+        <h2 class="section-heading" data-aos="fade-up">A Toolbox That Just Works.</h2>
+        <p class="section-subheading" data-aos="fade-up" data-aos-delay="100">No ads. No bloat. Just pure, unadulterated performance.</p>
+        <div class="features-grid">
+            <div class="feature-card-3d" data-aos="fade-up" data-aos-delay="200"><div class="feature-icon">🎯</div><h3>All-in-One</h3><p>One single website for all your daily file conversion and utility needs.</p></div>
+            <div class="feature-card-3d" data-aos="fade-up" data-aos-delay="300"><div class="feature-icon">🚀</div><h3>Blazing Fast</h3><p>Built with performance in mind. Your tasks are processed in seconds, not minutes.</p></div>
+            <div class="feature-card-3d" data-aos="fade-up" data-aos-delay="400"><div class="feature-icon">🛡️</div><h3>Private & Secure</h3><p>We process your files and then delete them. Your data never stays on our servers.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials container card-base">
+    <h2 class="section-heading" data-aos="fade-up">Trusted by Creatives & Developers</h2>
+    <div class="testimonial-grid">
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+            <p class="testimonial-quote">"Finally, a website that has all the tools I need without the annoying ads. Toolify is a lifesaver!"</p>
+            <div class="testimonial-author"><img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar" class="testimonial-avatar"><div class="author-details"><h4>Jessica Watson</h4><p>Web Developer</p></div></div>
+        </div>
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+            <p class="testimonial-quote">"The UI is just 🔥. It's fast, it's clean, and it actually looks good. 10/10 would recommend."</p>
+            <div class="testimonial-author"><img src="https://i.pravatar.cc/150?u=a042581f4e29026704e" alt="Avatar" class="testimonial-avatar"><div class="author-details"><h4>Francis Goodwill</h4><p>Graphic Designer</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="timeline-section card-base">
+    <div class="container">
+      <h2 class="section-heading" data-aos="fade-up">How It Works</h2>
+      <p class="section-subheading" data-aos="fade-up" data-aos-delay="100">Super simple. Maximum power, zero hassle.</p>
+      <div class="timeline">
+        <div class="timeline-container left" data-aos="fade-right" data-aos-delay="200"><div class="timeline-content"><h3>1. Choose & Upload</h3><p>Pick your tool and upload a file or paste a link.</p></div></div>
+        <div class="timeline-container right" data-aos="fade-left" data-aos-delay="300"><div class="timeline-content"><h3>2. We Do The Magic</h3><p>Our powerful backend processes your task instantly.</p></div></div>
+        <div class="timeline-container left" data-aos="fade-right" data-aos-delay="400"><div class="timeline-content"><h3>3. Download & Go</h3><p>Your're converted file is ready. No watermarks, no fuss.</p></div></div>
+      </div>
+    </div>
+</section>
+
+<section class="legal-section card-base">
+    <div class="container accordion">
+        <h2 class="section-heading" data-aos="fade-up">The Fine Print</h2>
+        <p class="section-subheading" data-aos="fade-up" data-aos-delay="100">We keep it simple. Here's what you need to know.</p>
+        <div data-aos="fade-up" data-aos-delay="200">
+            <details><summary>Terms of Service</summary><div class="legal-content"><ul><li>All tools are provided "as-is". Use them at your own risk.</li><li>Do not misuse or exploit any tool for illegal purposes.</li></ul></div></details>
+            <details><summary>Privacy Policy</summary><div class="legal-content"><ul><li>We don't store your files. They are processed and deleted.</li><li>We don't use cookies or trackers. Your privacy is respected.</li></ul></div></details>
+        </div>
+    </div>
+</section>
+
+<div class="explore-tools-wrapper" data-aos="zoom-in">
+    <button id="explore-btn" class="cta-button">Unleash The Toolbox 🔥</button>
+</div>
+
+<section id="tools-section" class="card-base">
+  <h2 class="section-heading" data-aos="fade-up">The Toolbox</h2>
+  <p class="section-subheading" data-aos="fade-up" data-aos-delay="100">All the power you need, right at your fingertips.</p>
+  <div class="tool-grid">
+    <div class="tool-card" data-aos="fade-up"><h3 class="tool-title neon-blue flicker">YouTube Downloader</h3><a href="/youtube_downloader" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="50"><h3 class="tool-title neon-yellow flicker">Word to PDF</h3><a href="/word_to_pdf" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="100"><h3 class="tool-title neon-green flicker">MP4 to MP3 Converter</h3><a href="/mp4_to_mp3" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="150"><h3 class="tool-title neon-orange flicker">File Compressor</h3><a href="/file_compressor" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="200"><h3 class="tool-title neon-pink flicker">PDF Merger</h3><a href="/pdf_merger" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="250"><h3 class="tool-title neon-red flicker">Text summarizer</h3><a href="/text_summarizer" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="300"><h3 class="tool-title neon-purple flicker">Password Generator</h3><a href="/password_generator" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="350"><h3 class="tool-title neon-cyan flicker">QR Generator</h3><a href="/qr_generator" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="400"><h3 class="tool-title neon-lime flicker">Image Converter</h3><a href="/image_converter" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="450"><h3 class="tool-title neon-white flicker">PDF to Word</h3><a href="/pdf_to_word" class="tool-btn">TRY NOW</a></div>
+    <div class="tool-card" data-aos="fade-up" data-aos-delay="500"><h3 class="tool-title neon-teal flicker">Unit Converter</h3><a href="/unit_converter" class="tool-btn">TRY NOW</a></div>
+  </div>
+</section>
+
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  AOS.init({duration:800,once:true,offset:100});
+  
+  const typewriterElement=document.getElementById("typewriter");
+  if(typewriterElement){
+    const text="One website. Amazing Tools. Powered by pure tech magic 🧪";
+    let isDeleting=false;
+    function typeWriter(){
+      let currentText=typewriterElement.innerHTML;
+      if(isDeleting){typewriterElement.innerHTML=text.substring(0,currentText.length-1);}
+      else{typewriterElement.innerHTML=text.substring(0,currentText.length+1);}
+      let typeSpeed=isDeleting?50:100;
+      if(!isDeleting&&typewriterElement.innerHTML===text){typeSpeed=2000;isDeleting=true;}
+      else if(isDeleting&&typewriterElement.innerHTML===""){isDeleting=false;typeSpeed=500;}
+      setTimeout(typeWriter,typeSpeed);}
+    typeWriter();
+  }
+
+  const exploreBtn=document.getElementById('explore-btn');
+  const toolsSection=document.getElementById('tools-section');
+  const exploreWrapper=document.querySelector('.explore-tools-wrapper');
+  if(exploreBtn){
+      exploreBtn.addEventListener('click',function(){
+          if(exploreWrapper)exploreWrapper.style.display='none';
+          if(toolsSection)toolsSection.style.display='block';
+          AOS.refresh();
+          toolsSection.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+  }
+
+  const cards = document.querySelectorAll('.feature-card-3d');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = -y / 20;
+        const rotateY = x / 20;
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+    });
+  });
+
+  const hero = document.querySelector('.hero');
+  const heroContent = document.querySelector('.hero-content');
+  const canvas = document.getElementById('hero-canvas');
+  if(canvas) {
+    const ctx = canvas.getContext('2d');
+    let width, height, particles;
+
+    function init() {
+        width = hero.offsetWidth;
+        height = hero.offsetHeight;
+        canvas.width = width;
+        canvas.height = height;
+        particles = [];
+        const particleCount = Math.floor(width * height / 15000);
+        for(let i=0; i<particleCount; i++){
+            particles.push(new Particle());
+        }
+    }
+
+    class Particle {
+        constructor(){
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1 - 0.5;
+        }
+        update(){
+            if(this.x > width || this.x < 0) this.speedX = -this.speedX;
+            if(this.y > height || this.y < 0) this.speedY = -this.speedY;
+            this.x += this.speedX;
+            this.y += this.speedY;
+        }
+        draw(){
+            ctx.fillStyle = 'rgba(0, 255, 195, 0.5)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    function connect(){
+        let opacityValue = 1;
+        for(let a=0; a<particles.length; a++){
+            for(let b=a; b<particles.length; b++){
+                let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+                if(distance < (width/7) * (height/7)){
+                    opacityValue = 1 - (distance/20000);
+                    ctx.strokeStyle = `rgba(0, 255, 195, ${opacityValue})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+    
+    function animate(){
+        ctx.clearRect(0,0,width,height);
+        for(let i=0; i<particles.length; i++){
+            particles[i].update();
+            particles[i].draw();
+        }
+        connect();
+        requestAnimationFrame(animate);
+    }
+    
+    init();
+    animate();
+
+    window.addEventListener('resize', function(){
+        init();
+    });
+
+    hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const moveX = (x - width/2) / 40;
+        const moveY = (y - height/2) / 40;
+        if(heroContent) heroContent.style.transform = `translateX(${-moveX}px) translateY(${-moveY}px)`;
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Features | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #f0f0f0;
+    padding: 20px;
+  }
+
+  .features-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: linear-gradient(145deg, #111927, #0b0f1a);
+    border-radius: 20px;
+    box-shadow: 0 0 15px #0ff;
+  }
+
+  .section-heading {
+    text-align: center;
+    font-size: 3rem;
+    color: #00ffc3;
+    text-shadow: 0 0 10px #00ffc3, 0 0 20px #00ffc3;
+    margin-bottom: 10px;
+  }
+
+  .features-intro {
+    text-align: center;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #aaa;
+    margin-bottom: 30px;
+    text-shadow: 0 0 5px #333;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: #161b22;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px #00ffc3;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px #00ffc3;
+  }
+
+  .feature-card h3 {
+    color: #00ffc3;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px #00ffc3;
+  }
+
+  .feature-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+  }
+
+  @media screen and (max-width: 600px) {
+    .section-heading {
+      font-size: 2.2rem;
+    }
+
+    .feature-card {
+      padding: 20px 15px;
+    }
+  }
+</style>
+
+<section class="features-section">
+  <h1 class="section-heading">⚡ Toolify Features</h1>
+  <p class="features-intro">Why settle for basic when you can go beast mode? 😎</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <h3>🎯 All-in-One Toolbox</h3>
+      <p>No more hunting for random online tools — everything you need is right here in one clean, glowing interface.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>⚙️ Fully Offline Capable</h3>
+      <p>Yup, Toolify works offline for most tools. So even when your Wi-Fi ghosts you, your workflow won’t suffer.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🚀 Lightning-Fast Performance</h3>
+      <p>Optimized from the ground up with lean code, snappy interactions, and zero lag vibes.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🧩 Modular Architecture</h3>
+      <p>Each tool is a plug-and-play module — making it easy to expand, swap, or upgrade in the future.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🌈 Gen-Z UI with Glow</h3>
+      <p>It’s not just functional — glowing neon buttons, smooth animations, and clean layout — Toolify makes utility look dope.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🛡️ 100% Safe & Secure</h3>
+      <p>No sketchy APIs. No data leaks. Just local tools, doing local jobs, the right way.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>📱 Mobile-Responsive</h3>
+      <p>Toolify adapts beautifully to all screen sizes — from desktops to the tiniest phones. Use tools anytime, anywhere.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🧠 AI-Powered Suggestions</h3>
+      <p>Coming soon: Smart recommendations based on your past tool usage to save your time and clicks.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🖇️ Cross-Tool Integration</h3>
+      <p>Use outputs of one tool as input for another — no need to re-upload or re-convert manually.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🔔 Instant Feedback Alerts</h3>
+      <p>Quick popups and alerts when your task is done — with sounds, confetti, and good vibes.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🗃️ User History Tracking</h3>
+      <p>See your last 5 tools used, stored locally. No server storage — your privacy stays yours.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>💬 Built-in Chat Assistant</h3>
+      <p>Ask the chatbot how to use any tool, get help, or just chat about how awesome Toolify is 😄</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

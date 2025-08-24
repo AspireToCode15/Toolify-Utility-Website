@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Terms & Conditions | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #f0f0f0;
+    padding: 20px;
+  }
+
+  .legal-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: linear-gradient(145deg, #111927, #0b0f1a);
+    border-radius: 20px;
+    box-shadow: 0 0 15px #0ff;
+  }
+
+  .section-heading {
+    text-align: center;
+    font-size: 3rem;
+    color: #00bfff;
+    text-shadow: 0 0 10px #00bfff, 0 0 20px #0077cc;
+    margin-bottom: 30px;
+  }
+
+  .legal-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .legal-content ul {
+    list-style: none;
+    padding-left: 20px;
+    margin-bottom: 20px;
+  }
+
+  .legal-content li {
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+    margin-bottom: 12px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .legal-content li::before {
+    content: "🌀";
+    padding-right: 10px;
+    color: #00ffe7;
+    text-shadow: 0 0 5px #0ff;
+  }
+
+  .legal-content p:last-of-type {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 1.1rem;
+    color: #e0e0e0;
+  }
+</style>
+
+<section class="legal-section">
+  <h1 class="section-heading">📜 Terms & Conditions</h1>
+  <div class="legal-content">
+    <p>By using Toolify, you agree to follow these terms:</p>
+    <ul>
+      <li>🛠️ All tools are provided "as-is" with no guarantees.</li>
+      <li>🔒 You agree not to misuse or exploit any tool.</li>
+      <li>📁 You are responsible for your own file uploads and downloads.</li>
+      <li>🧾 We may update these terms without prior notice.</li>
+      <li>🚫 Illegal use of tools (e.g. copyright downloads) is prohibited.</li>
+    </ul>
+    <p>If you don’t agree, please don’t use Toolify.</p>
+  </div>
+</section>
+{% endblock %}

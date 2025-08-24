@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background: #0d1117;
+    font-family: 'Segoe UI', sans-serif;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hiw-card-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #101620, #222c3a);
+    border-radius: 20px;
+    box-shadow: 0 0 15px #00ffe7;
+  }
+
+  .section-heading {
+    text-align: center;
+    font-size: 3rem;
+    color: #00bfff;
+    text-shadow: 0 0 10px #00bfff, 0 0 20px #0077cc;
+    margin-bottom: 10px;
+  }
+
+  .hiw-subtext {
+    text-align: center;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #aaa;
+    margin-bottom: 30px;
+    text-shadow: 0 0 5px #333;
+  }
+
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .hiw-card {
+    background: #161b22;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px #00ffe7;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hiw-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px #00bfff;
+  }
+
+  .hiw-card h3 {
+    color: #00ffe7;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px #00ffe7;
+  }
+
+  .hiw-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+  }
+</style>
+
+<section class="hiw-card-section">
+  <h1 class="section-heading">🛠️ How Toolify Works</h1>
+  <p class="hiw-subtext">6 simple steps. Maximum power. Minimal effort.</p>
+
+  <div class="card-container">
+    <div class="hiw-card">
+      <h3>🔍 Step 1: Choose Your Tool</h3>
+      <p>Browse through Toolify's toolbox. Pick the tool you need — whether it’s a video downloader or file compressor.</p>
+    </div>
+    <div class="hiw-card">
+      <h3>📁 Step 2: Upload or Paste</h3>
+      <p>Upload your file or paste a link. Toolify supports a wide range of formats and sources.</p>
+    </div>
+    <div class="hiw-card">
+      <h3>⚙️ Step 3: Customize Settings</h3>
+      <p>Need high quality? Want low size? Select your preferences — you’re the boss here.</p>
+    </div>
+    <div class="hiw-card">
+      <h3>⚡ Step 4: Process Instantly</h3>
+      <p>With one click, Toolify runs your file through high-speed processing. Done in seconds.</p>
+    </div>
+    <div class="hiw-card">
+      <h3>✅ Step 5: Download Result</h3>
+      <p>Download your processed file instantly. Clean, safe, and watermark-free — always.</p>
+    </div>
+    <div class="hiw-card">
+      <h3>🔄 Step 6: Try Another Tool</h3>
+      <p>Need more tools? Head back and start another task — Toolify never says no.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

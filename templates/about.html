@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}About | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #f0f0f0;
+    padding: 20px;
+  }
+
+  .about-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: linear-gradient(145deg, #111927, #0b0f1a);
+    border-radius: 20px;
+    box-shadow: 0 0 15px #0ff;
+  }
+
+  .section-heading {
+    text-align: center;
+    font-size: 3rem;
+    color: #00bfff;
+    text-shadow: 0 0 10px #00bfff, 0 0 20px #0077cc;
+    margin-bottom: 10px;
+  }
+
+  .about-tagline {
+    text-align: center;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #aaa;
+    margin-bottom: 30px;
+    text-shadow: 0 0 5px #333;
+  }
+
+  .about-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .about-content h3 {
+    font-size: 1.4rem;
+    color: #00bfff;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px #00bfff;
+  }
+
+  .about-list {
+    list-style: none;
+    padding-left: 20px;
+    margin-bottom: 20px;
+  }
+
+  .about-list li {
+    padding-left: 1.2em;
+    text-indent: -1.2em;
+    margin-bottom: 10px;
+  }
+
+  .about-list li::before {
+    content: "✨";
+    padding-right: 10px;
+    color: #00ffe7;
+    text-shadow: 0 0 5px #0ff;
+  }
+
+  .about-bottom {
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 30px;
+    color: #e0e0e0;
+    text-align: center;
+  }
+
+  .slogan-glow {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #00ffe7;
+    text-shadow: 0 0 5px #0ff, 0 0 10px #00bfff;
+  }
+
+  /* Button style just in case you add one later */
+  .toolify-btn {
+    background-color: #00bfff;
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00bfff;
+    transition: 0.3s ease;
+  }
+
+  .toolify-btn:hover {
+    background-color: #0080ff;
+    box-shadow: 0 0 15px #00e5ff;
+    transform: scale(1.05);
+  }
+</style>
+
+<section class="about-section">
+  <h1 class="section-heading">🚀 About Toolify</h1>
+  <p class="about-tagline">Not just a website — a full-stack utility empire ⚙️</p>
+
+  <div class="about-content">
+    <p>
+      Toolify is your all-in-one digital Swiss Army knife. Designed for the modern user, it's a powerhouse of online utilities that just work — fast, clean, and no distractions.
+    </p>
+
+    <p>
+      Whether you're compressing files, converting media, downloading from the web, or just fixing a format mismatch — Toolify brings it all under one roof with simplicity and style.
+    </p>
+
+    <p>
+      Our mission is simple: <strong>Make complex tools simple, accessible, and blazing fast</strong>. We hate bloated apps, annoying ads, and shady download links — so we built something better.
+    </p>
+
+    <h3>📌 Why Toolify Exists:</h3>
+    <ul class="about-list">
+      <li>🔧 To remove dependency on multiple shady third-party apps</li>
+      <li>⚡ To deliver quick, secure, offline-friendly tools</li>
+      <li>🧠 To blend utility with aesthetics — function meets form</li>
+    </ul>
+
+    <h3>💡 Tech Stack Behind Toolify:</h3>
+    <ul class="about-list">
+      <li>🌐 Frontend: HTML, CSS, JavaScript (pure, no frameworks)</li>
+      <li>🐍 Backend: Python + Flask (lightweight, powerful)</li>
+      <li>🧮 Database: MongoDB (for tool history, feedback, and more)</li>
+      <li>🚀 Hosting-ready, Offline-friendly architecture</li>
+    </ul>
+
+    <p class="about-bottom">
+      Handcrafted with ❤️ by <strong>Sadiq</strong>, a passionate coder on a mission to make the web more useful, tool by tool. <br>
+      Toolify isn’t just a project — it's a revolution in digital utility. You're not just using it. You're joining the movement.
+    </p>
+
+    <p class="slogan-glow">"One site. Unlimited tools. Infinite possibilities." ✨</p>
+  </div>
+</section>
+{% endblock %}

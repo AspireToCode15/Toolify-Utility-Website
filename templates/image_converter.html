@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% block title %}Image Converter | Toolify{% endblock %}
+
+{% block content %}
+<style>
+  /* --- Consistent theme styles from other pages --- */
+  body {
+    background-color: #0a0a0a;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .background-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 255, 195, 0.05) 1px, transparent 1px), linear-gradient(to right, rgba(0, 255, 195, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -2;
+    animation: pan-grid 60s linear infinite;
+  }
+
+  @keyframes pan-grid { from { background-position: 0 0; } to { background-position: 400px 400px; } }
+  @keyframes aurora { 0% { transform: translate(10%, 10%) rotate(0deg); } 50% { transform: translate(-10%, -10%) rotate(180deg); } 100% { transform: translate(10%, 10%) rotate(360deg); } }
+
+  .tool-section {
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+  }
+
+  /* --- Glassy container style --- */
+  .tool-wrapper {
+    max-width: 700px;
+    width: 100%;
+    padding: 40px;
+    background: rgba(18, 25, 39, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 195, 0.15);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .tool-wrapper:hover {
+    border-color: rgba(0, 255, 195, 0.4);
+    box-shadow: 0 0 25px rgba(0, 255, 195, 0.2);
+  }
+
+  .tool-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(0, 255, 195, 0.1) 0%, transparent 40%);
+    animation: aurora 8s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* --- Form Styling --- */
+  .tool-title {
+    font-size: 2.5rem;
+    text-align: center;
+    color: #00ffc3;
+    text-shadow: 0 0 8px #00ffc3;
+    margin-bottom: 20px;
+  }
+
+  .tool-description {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    color: #aaa;
+  }
+
+  .convert-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .form-group {
+    width: 100%;
+    display: flex; /* Using flexbox for alignment */
+    flex-direction: column;
+    align-items: center; /* Center the content of the group */
+    gap: 10px; /* Space between label and filename */
+  }
+
+  .file-input { display: none; }
+
+  .file-label {
+    padding: 14px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: 2px dashed #00ffc3;
+    border-radius: 10px;
+    background: rgba(0, 255, 195, 0.1);
+    color: #00ffc3;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .file-label:hover {
+    background: rgba(0, 255, 195, 0.2);
+    border-style: solid;
+  }
+  
+  .filename { 
+    color: #aaa; 
+    font-size: 1rem; 
+  }
+  
+  select {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #222;
+    background: rgba(28, 28, 28, 0.7);
+    color: #fff;
+    width: 100%;
+    font-size: 1rem;
+    box-shadow: none;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  
+  select:focus {
+    border-color: #00ffc3;
+  }
+
+  .convert-btn {
+    padding: 14px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    background: #00ffc3;
+    color: #000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px #00ffc3, 0 0 20px #00ffc3;
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .convert-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #00ffc3, 0 0 30px #00ffc3;
+  }
+  
+  .convert-btn:disabled { background: #555; color: #999; cursor: not-allowed; box-shadow: none; }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-box {
+    margin-top: 30px; padding: 20px;
+    border-radius: 10px;
+    background: rgba(0, 255, 195, 0.1);
+    border: 1px solid #00ffc3;
+    color: #fff; font-weight: bold; text-align: center;
+  }
+  
+  .result-box.error { background: rgba(255, 51, 51, 0.1); border-color: #ff3333; color: #ffcccc; }
+
+  .download-btn {
+    display: inline-block; margin-top: 15px;
+    background: #00ffc3; color: #000;
+    padding: 10px 22px; border-radius: 50px;
+    font-weight: bold; text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .download-btn:hover { transform: scale(1.05); }
+</style>
+
+<div class="background-grid"></div>
+
+<section class="tool-section">
+  <div class="tool-wrapper">
+    <h2 class="tool-title">🖼️ Image Converter</h2>
+    <p class="tool-description">Upload an image and convert it into your desired format instantly! ✨</p>
+
+    <form method="POST" enctype="multipart/form-data" class="convert-form" id="convertForm">
+      
+      <!-- ** CORRECTED FILE INPUT SECTION ** -->
+      <div class="form-group">
+        <label for="image" class="file-label">📂 Choose Image</label>
+        <input type="file" name="image" id="image" accept="image/*" required class="file-input">
+        <div class="filename" id="filename">No file selected</div>
+      </div>
+      
+      <div class="form-group">
+        <select name="format" id="format" required>
+          <option value="" disabled selected>Select Target Format</option>
+          <option value="PNG">PNG</option>
+          <option value="JPEG">JPEG</option>
+          <option value="WEBP">WEBP</option>
+          <option value="BMP">BMP</option>
+          <option value="GIF">GIF</option>
+          <option value="TIFF">TIFF</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="convert-btn" id="convertBtn">
+        <span id="btn-text">🛠️ Convert Image</span>
+        <div class="spinner" id="spinner" style="display: none;"></div>
+      </button>
+    </form>
+
+    {% if filename %}
+      <div class="result-box">
+        ✅ Converted Successfully!
+        <br><br>
+        <a href="{{ file_url }}" download class="download-btn">⬇️ Download {{ filename }}</a>
+      </div>
+    {% elif error %}
+      <div class="result-box error">
+        ⚠️ {{ error }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+    const fileInput = document.getElementById('image');
+    const filenameDisplay = document.getElementById('filename');
+    const convertForm = document.getElementById('convertForm');
+    const convertBtn = document.getElementById('convertBtn');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            filenameDisplay.textContent = fileInput.files[0].name;
+        } else {
+            filenameDisplay.textContent = "No file selected";
+        }
+    });
+
+    convertForm.addEventListener('submit', (event) => {
+        if (fileInput.files.length === 0) {
+            event.preventDefault();
+            alert("Please select an image file first!");
+            return;
+        }
+        convertBtn.disabled = true;
+        btnText.textContent = 'Converting...';
+        spinner.style.display = 'block';
+    });
+</script>
+{% endblock %}
