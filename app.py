@@ -4,11 +4,9 @@ from flask import (
 import os
 from pdf2docx import Converter
 import docx
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
 import pint
 import subprocess
 import uuid
@@ -23,24 +21,10 @@ from PIL import Image as PILImage
 from tools_backend.mp4_to_mp3 import convert_mp4_to_mp3
 import qrcode
 import fitz
-from docx import Document
-import pypandoc
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
 from werkzeug.utils import secure_filename
 import requests
 from pymongo import MongoClient
-import nltk
-
-# --- NLTK DATA SETUP (THE DEFINITIVE FIX) ---
-# This code ensures that NLTK knows where to find the data downloaded during the build.
-nltk_data_dir = os.path.join(os.path.dirname(__file__), 'nltk_data')
-if not os.path.exists(nltk_data_dir):
-    os.makedirs(nltk_data_dir)
-if nltk_data_dir not in nltk.data.path:
-    nltk.data.path.append(nltk_data_dir)
-# --- END OF NLTK FIX ---
+from rembg import remove # New library for background removal
 
 app = Flask(__name__)
 app.secret_key = 'kuchbhi_123_secret'
@@ -89,7 +73,32 @@ def view_feedback():
     feedbacks = feedback_collection.find().sort("_id", -1)
     return render_template('view_feedback.html', feedbacks=feedbacks)
 
-# ========= NEW WORD DICTIONARY TOOL =========
+# ========= NEW IMAGE BACKGROUND REMOVER TOOL =========
+@app.route("/background_remover", methods=["GET", "POST"])
+def background_remover():
+    if request.method == "POST":
+        file = request.files.get("image")
+        if not file:
+            return render_template("background_remover.html", error="Please upload an image file.")
+        
+        try:
+            input_bytes = file.read()
+            output_bytes = remove(input_bytes)
+            
+            original_filename = secure_filename(file.filename)
+            base, ext = os.path.splitext(original_filename)
+            output_filename = f"{base}_transparent.png" # Output is always PNG
+            output_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
+            
+            with open(output_path, "wb") as f:
+                f.write(output_bytes)
+                
+            return render_template("background_remover.html", output_filename=output_filename)
+        except Exception as e:
+            return render_template("background_remover.html", error=f"An error occurred: {str(e)}")
+            
+    return render_template("background_remover.html")
+
 @app.route("/dictionary", methods=["GET", "POST"])
 def dictionary():
     definition = None
@@ -233,49 +242,6 @@ def image_converter():
         except Exception as e:
             return render_template("image_converter.html", error=f"❌ Conversion failed: {str(e)}")
     return render_template("image_converter.html")
-
-@app.route("/text_summarizer", methods=["GET", "POST"])
-def text_summarizer():
-    summary = None
-    original_text = None
-    if request.method == "POST":
-        original_text = request.form["text"]
-        parser = PlaintextParser.from_string(original_text, Tokenizer("english"))
-        summarizer = LsaSummarizer()
-        summary_sentences = summarizer(parser.document, 3)
-        summary = " ".join(str(sentence) for sentence in summary_sentences)
-    return render_template("text_summarizer.html", summary=summary, original_text=original_text)
-
-ureg = pint.UnitRegistry()
-UNIT_OPTIONS = {
-    "Length": ["meter", "kilometer", "centimeter", "millimeter", "mile", "yard", "foot", "inch"],
-    "Mass": ["kilogram", "gram", "milligram", "pound", "ounce"],
-    "Volume": ["liter", "milliliter", "gallon", "quart", "pint", "cup", "fluid_ounce"]
-}
-
-@app.route('/unit_converter', methods=['GET', 'POST'])
-def unit_converter():
-    context = {
-        "unit_options": UNIT_OPTIONS,
-        "result": None,
-        "error": None,
-        "value": 1,
-        "from_unit": "meter",
-        "to_unit": "kilometer"
-    }
-    if request.method == 'POST':
-        try:
-            context['value'] = float(request.form.get('value'))
-            context['from_unit'] = request.form.get('from_unit')
-            context['to_unit'] = request.form.get('to_unit')
-            from_quantity = context['value'] * ureg(context['from_unit'])
-            to_quantity = from_quantity.to(ureg(context['to_unit']))
-            context['result'] = round(to_quantity.magnitude, 6)
-        except pint.errors.DimensionalityError:
-            context['error'] = f"Cannot convert from '{context['from_unit']}' to '{context['to_unit']}'. Units are not compatible."
-        except Exception as e:
-            context['error'] = "An unexpected error occurred during conversion."
-    return render_template('unit_converter.html', **context)
 
 @app.route('/word_to_pdf', methods=['GET', 'POST'])
 def word_to_pdf():
