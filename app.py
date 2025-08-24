@@ -33,13 +33,14 @@ import requests
 from pymongo import MongoClient
 import nltk
 
-nltk_data_path = os.path.join(os.path.dirname(__file__), "nltk_data")
-os.makedirs(nltk_data_path, exist_ok=True)
-nltk.data.path.append(nltk_data_path)
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_data_path)
+# --- NLTK DATA SETUP (THE DEFINITIVE FIX) ---
+# This code ensures that NLTK knows where to find the data downloaded during the build.
+nltk_data_dir = os.path.join(os.path.dirname(__file__), 'nltk_data')
+if not os.path.exists(nltk_data_dir):
+    os.makedirs(nltk_data_dir)
+if nltk_data_dir not in nltk.data.path:
+    nltk.data.path.append(nltk_data_dir)
+# --- END OF NLTK FIX ---
 
 app = Flask(__name__)
 app.secret_key = 'kuchbhi_123_secret'
@@ -107,7 +108,7 @@ def dictionary():
                 else:
                     error = f"Could not find a definition for '{word}'. Please check the spelling."
             except Exception as e:
-                error = f"An error occurred: {str(e)}"
+                error = "An error occurred while connecting to the dictionary service."
     return render_template("dictionary.html", definition=definition, error=error, word=word)
 
 @app.route("/mp4_to_mp3", methods=["GET", "POST"])
@@ -236,13 +237,14 @@ def image_converter():
 @app.route("/text_summarizer", methods=["GET", "POST"])
 def text_summarizer():
     summary = None
+    original_text = None
     if request.method == "POST":
-        raw_text = request.form["text"]
-        parser = PlaintextParser.from_string(raw_text, Tokenizer("english"))
+        original_text = request.form["text"]
+        parser = PlaintextParser.from_string(original_text, Tokenizer("english"))
         summarizer = LsaSummarizer()
         summary_sentences = summarizer(parser.document, 3)
         summary = " ".join(str(sentence) for sentence in summary_sentences)
-    return render_template("text_summarizer.html", summary=summary)
+    return render_template("text_summarizer.html", summary=summary, original_text=original_text)
 
 ureg = pint.UnitRegistry()
 UNIT_OPTIONS = {
