@@ -24,7 +24,7 @@ import fitz
 from werkzeug.utils import secure_filename
 import requests
 from pymongo import MongoClient
-from rembg import remove # New library for background removal
+from rembg import remove
 
 app = Flask(__name__)
 app.secret_key = 'kuchbhi_123_secret'
@@ -73,7 +73,6 @@ def view_feedback():
     feedbacks = feedback_collection.find().sort("_id", -1)
     return render_template('view_feedback.html', feedbacks=feedbacks)
 
-# ========= NEW IMAGE BACKGROUND REMOVER TOOL =========
 @app.route("/background_remover", methods=["GET", "POST"])
 def background_remover():
     if request.method == "POST":
@@ -87,7 +86,7 @@ def background_remover():
             
             original_filename = secure_filename(file.filename)
             base, ext = os.path.splitext(original_filename)
-            output_filename = f"{base}_transparent.png" # Output is always PNG
+            output_filename = f"{base}_transparent.png"
             output_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
             
             with open(output_path, "wb") as f:
