@@ -23,15 +23,16 @@ import qrcode
 import fitz
 from werkzeug.utils import secure_filename
 import requests
-from pymongo import MongoClient
+# from pymongo import MongoClient <-- REMOVED
 from rembg import remove
 
 app = Flask(__name__)
 app.secret_key = 'kuchbhi_123_secret'
 
-client = MongoClient('mongodb://localhost:27017/')
-db = client['toolify']
-feedback_collection = db['feedback']
+# --- MONGODB CODE REMOVED ---
+# client = MongoClient('mongodb://localhost:27017/')
+# db = client['toolify']
+# feedback_collection = db['feedback']
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
@@ -47,16 +48,11 @@ app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
 def home():
     return render_template('index.html')
 
+# --- FEEDBACK ROUTE DISABLED ---
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        rating = request.form['rating']
-        message = request.form['message']
-        feedback_data = {'name': name, 'email': email, 'rating': rating, 'message': message}
-        feedback_collection.insert_one(feedback_data)
-        flash('Thank you for your feedback!', 'success')
+        flash('This feature is temporarily disabled. Please check back later!', 'info')
         return redirect('/feedback')
     return render_template('feedback.html')
 
@@ -64,14 +60,12 @@ def feedback():
 def faq():
     return render_template('faq.html')
 
+# --- VIEW-FEEDBACK ROUTE DISABLED ---
 @app.route('/view-feedback')
 def view_feedback():
-    auth = request.authorization
-    if not auth or not (auth.username == "admin" and auth.password == "toolify123"):
-        return Response("Could not verify your access.\n\nPlease provide correct username and password.",
-                        401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
-    feedbacks = feedback_collection.find().sort("_id", -1)
-    return render_template('view_feedback.html', feedbacks=feedbacks)
+    return "This feature is temporarily disabled.", 404
+
+# ... (ALL YOUR OTHER WORKING TOOL ROUTES GO HERE, I have included them below) ...
 
 @app.route("/background_remover", methods=["GET", "POST"])
 def background_remover():
@@ -304,3 +298,5 @@ def download_file(filename):
         )
     except FileNotFoundError:
         return "File not found!", 404
+
+
