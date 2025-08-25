@@ -1,5 +1,5 @@
 from flask import (
-    Flask, render_template, request, url_for, send_from_directory, redirect, flash, Response
+    Flask, render_template, request, url_for, send_from_directory, redirect, flash, Response, jsonify
 )
 import os
 from pdf2docx import Converter
@@ -23,16 +23,10 @@ import qrcode
 import fitz
 from werkzeug.utils import secure_filename
 import requests
-# from pymongo import MongoClient <-- REMOVED
-from rembg import remove
+import markdown
 
 app = Flask(__name__)
 app.secret_key = 'kuchbhi_123_secret'
-
-# --- MONGODB CODE REMOVED ---
-# client = MongoClient('mongodb://localhost:27017/')
-# db = client['toolify']
-# feedback_collection = db['feedback']
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
@@ -48,7 +42,6 @@ app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
 def home():
     return render_template('index.html')
 
-# --- FEEDBACK ROUTE DISABLED ---
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
     if request.method == 'POST':
@@ -60,37 +53,20 @@ def feedback():
 def faq():
     return render_template('faq.html')
 
-# --- VIEW-FEEDBACK ROUTE DISABLED ---
 @app.route('/view-feedback')
 def view_feedback():
     return "This feature is temporarily disabled.", 404
 
-# ... (ALL YOUR OTHER WORKING TOOL ROUTES GO HERE, I have included them below) ...
+@app.route("/markdown_editor", methods=["GET"])
+def markdown_editor():
+    return render_template("markdown_editor.html")
 
-@app.route("/background_remover", methods=["GET", "POST"])
-def background_remover():
-    if request.method == "POST":
-        file = request.files.get("image")
-        if not file:
-            return render_template("background_remover.html", error="Please upload an image file.")
-        
-        try:
-            input_bytes = file.read()
-            output_bytes = remove(input_bytes)
-            
-            original_filename = secure_filename(file.filename)
-            base, ext = os.path.splitext(original_filename)
-            output_filename = f"{base}_transparent.png"
-            output_path = os.path.join(app.config['CONVERTED_FOLDER'], output_filename)
-            
-            with open(output_path, "wb") as f:
-                f.write(output_bytes)
-                
-            return render_template("background_remover.html", output_filename=output_filename)
-        except Exception as e:
-            return render_template("background_remover.html", error=f"An error occurred: {str(e)}")
-            
-    return render_template("background_remover.html")
+@app.route("/convert_markdown", methods=["POST"])
+def convert_markdown():
+    data = request.json
+    md_text = data.get('markdown_text', '')
+    html = markdown.markdown(md_text, extensions=['fenced_code', 'tables'])
+    return jsonify({'html': html})
 
 @app.route("/dictionary", methods=["GET", "POST"])
 def dictionary():
@@ -298,5 +274,3 @@ def download_file(filename):
         )
     except FileNotFoundError:
         return "File not found!", 404
-
-

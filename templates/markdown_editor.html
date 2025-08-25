@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Markdown Editor - Toolify{% endblock %}
+
+{% block content %}
+<style>
+  body{background-color:#0a0a0a;color:#fff;font-family:'Segoe UI',sans-serif}.background-grid{position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,255,195,.05) 1px,transparent 1px),linear-gradient(to right,rgba(0,255,195,.05) 1px,transparent 1px);background-size:40px 40px;z-index:-2;animation:pan-grid 60s linear infinite}@keyframes pan-grid{from{background-position:0 0}to{background-position:400px 400px}}.tool-section{padding:40px 20px;display:flex;justify-content:center;align-items:center;min-height:90vh}.tool-wrapper{max-width:95%;width:100%;padding:30px;background:rgba(18,25,39,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,255,195,.15);border-radius:20px}.tool-title{font-size:2.5rem;text-align:center;color:#00ffc3;text-shadow:0 0 8px #00ffc3;margin-bottom:20px}.editor-container{display:flex;gap:20px;height:60vh}textarea,.preview{width:50%;padding:15px;border-radius:10px;font-size:1rem;color:#fff;outline:0;transition:all .3s ease;border:1px solid #222;background:rgba(28,28,28,.7);font-family:monospace;resize:none}textarea:focus{border-color:#00ffc3;box-shadow:0 0 10px rgba(0,255,195,.3)}.preview{overflow-y:auto}.preview h1,.preview h2{color:#00ffc3;border-bottom:1px solid #00ffc3;padding-bottom:5px}.preview code{background:#111;padding:2px 5px;border-radius:5px}.preview pre{background:#111;padding:10px;border-radius:5px;overflow-x:auto}.preview table{width:100%;border-collapse:collapse}.preview th,.preview td{border:1px solid #555;padding:8px}.preview th{background:#222}
+</style>
+
+<div class="background-grid"></div>
+
+<section class="tool-section">
+  <div class="tool-wrapper">
+    <h2 class="tool-title">🖋️ Real-time Markdown Editor</h2>
+    <div class="editor-container">
+      <textarea id="markdown-input" placeholder="# Welcome to your Markdown Editor!"></textarea>
+      <div id="html-preview" class="preview"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const markdownInput = document.getElementById('markdown-input');
+  const htmlPreview = document.getElementById('html-preview');
+
+  async function convertMarkdown() {
+    const response = await fetch('/convert_markdown', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ markdown_text: markdownInput.value }),
+    });
+    const data = await response.json();
+    htmlPreview.innerHTML = data.html;
+  }
+
+  markdownInput.addEventListener('input', convertMarkdown);
+  window.addEventListener('load', convertMarkdown);
+</script>
+{% endblock %}
