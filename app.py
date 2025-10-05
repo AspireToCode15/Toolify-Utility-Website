@@ -89,6 +89,42 @@ def dictionary():
                 error = "An error occurred while connecting to the dictionary service."
     return render_template("dictionary.html", definition=definition, error=error, word=word)
 
+@app.route('/unit_converter', methods=['GET', 'POST'])
+def unit_converter():
+    unit_options = {
+        "Length": ["millimeter", "centimeter", "meter", "kilometer", "inch", "foot", "yard", "mile"],
+        "Mass": ["milligram", "gram", "kilogram", "ton", "ounce", "pound"],
+        "Volume": ["milliliter", "liter", "cubic_meter", "cubic_centimeter", "gallon", "quart", "pint", "cup"]
+    }
+
+    ureg = pint.UnitRegistry(auto_reduce_dimensions=True)
+    error = result = value = None
+    from_unit = to_unit = None
+
+    if request.method == 'POST':
+        from_unit = request.form.get('from_unit', '').strip()
+        to_unit = request.form.get('to_unit', '').strip()
+        value = request.form.get('value', '1').strip()
+        try:
+            val = float(value)
+            from_unit_safe = from_unit.replace('_', ' ')
+            to_unit_safe = to_unit.replace('_', ' ')
+            q = val * ureg(from_unit_safe)
+            conv = q.to(to_unit_safe)
+            result = round(conv.magnitude, 6)
+        except Exception as ex:
+            error = f"Conversion error: {str(ex)}"
+
+    return render_template(
+        "unit_converter.html",
+        unit_options=unit_options,
+        from_unit=from_unit,
+        to_unit=to_unit,
+        value=value,
+        result=result,
+        error=error
+    )
+
 @app.route("/mp4_to_mp3", methods=["GET", "POST"])
 def mp4_to_mp3():
     if request.method == "POST":
